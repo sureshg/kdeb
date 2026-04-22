@@ -1,0 +1,31 @@
+# Mac OSX
+.DS_Store
+
+# JetBrains
+.idea/
+*.iml
+out/
+
+# Java
+hs_err_pid*
+classes.lst
+*.jsa
+*.aot*
+jre/
+
+# Kotlin
+**/.kotlin
+*.class
+
+# Amper
+build/
+
+# AI Agents & Tools
+.junie/
+.claude/settings.local.json
+.claude/statsig/
+.claude/todos/
+CLAUDE.local.md
+.codex/
+.cursor/
+.env

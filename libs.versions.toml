@@ -1,0 +1,59 @@
+[versions]
+kotlin                         = "2.4.0-Beta1"
+kotlinx-coroutines             = "1.10.2"
+kotlinx-datetime               = "0.7.1"
+kotlinx-io                     = "0.9.0"
+kotlinx-serialization          = "1.11.0"
+ktor                           = "3.4.2"
+kotlin-redacted                = "1.16.0"
+kotlin-logging                 = "8.0.01"
+kotlin-cryptography            = "0.6.0"
+kotlin-base32                  = "1.0.1"
+slf4j                          = "2.1.0-alpha1"
+ajalt-mordant                  = "3.0.2"
+ajalt-clikt                    = "5.1.0"
+ajalt-colormath                = "3.6.1"
+kommand                        = "2.3.0"
+kflate                         = "1.0.0"
+
+[libraries]
+kotlin-bom                           = { module = "org.jetbrains.kotlin:kotlin-bom"                                 , version.ref = "kotlin" }
+kotlin-test                          = { module = "org.jetbrains.kotlin:kotlin-test"                                , version.ref = "kotlin" }
+kotlinx-coroutines-bom               = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom"                    , version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core              = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core"                   , version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test              = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test"                   , version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-bom            = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom"                 , version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json           = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json"                , version.ref = "kotlinx-serialization" }
+kotlinx-datetime                     = { module = "org.jetbrains.kotlinx:kotlinx-datetime"                          , version.ref = "kotlinx-datetime" }
+kotlinx-io-bytestring                = { module = "org.jetbrains.kotlinx:kotlinx-io-bytestring"                     , version.ref = "kotlinx-io" }
+kotlinx-io-core                      = { module = "org.jetbrains.kotlinx:kotlinx-io-core"                           , version.ref = "kotlinx-io" }
+ktor-bom                             = { module = "io.ktor:ktor-bom"                                                , version.ref = "ktor" }
+ktor-client-core                     = { module = "io.ktor:ktor-client-core"                                        , version.ref = "ktor" }
+ktor-client-cio                      = { module = "io.ktor:ktor-client-cio"                                         , version.ref = "ktor" }
+ktor-client-curl                     = { module = "io.ktor:ktor-client-curl"                                        , version.ref = "ktor" }
+ktor-client-serialization            = { module = "io.ktor:ktor-client-serialization"                               , version.ref = "ktor" }
+ktor-client-websockets               = { module = "io.ktor:ktor-client-websockets"                                  , version.ref = "ktor" }
+ktor-client-content-negotiation      = { module = "io.ktor:ktor-client-content-negotiation"                         , version.ref = "ktor" }
+ktor-client-auth                     = { module = "io.ktor:ktor-client-auth"                                        , version.ref = "ktor" }
+ktor-client-logging                  = { module = "io.ktor:ktor-client-logging"                                     , version.ref = "ktor" }
+ktor-client-resources                = { module = "io.ktor:ktor-client-resources"                                   , version.ref = "ktor" }
+ktor-client-encoding                 = { module = "io.ktor:ktor-client-encoding"                                    , version.ref = "ktor" }
+ktor-client-mock                     = { module = "io.ktor:ktor-client-mock"                                        , version.ref = "ktor" }
+ktor-serialization-json              = { module = "io.ktor:ktor-serialization-kotlinx-json"                         , version.ref = "ktor" }
+slf4j-simple                         = { module = "org.slf4j:slf4j-simple"                                          , version.ref = "slf4j" }
+kotlin-logging                       = { module = "io.github.oshai:kotlin-logging"                                  , version.ref = "kotlin-logging" }
+kotlin-redacted-annotations          = { module = "dev.zacsweers.redacted:redacted-compiler-plugin-annotations"     , version.ref = "kotlin-redacted" }
+kotlin-redacted-compilerPlugin       = { module = "dev.zacsweers.redacted:redacted-compiler-plugin"                 , version.ref = "kotlin-redacted" }
+kotlin-cryptography-core             = { module = "dev.whyoleg.cryptography:cryptography-core"                      , version.ref = "kotlin-cryptography" }
+kotlin-cryptography-optimal          = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal"          , version.ref = "kotlin-cryptography" }
+kotlin-base32                        = { module = "com.osmerion.kotlin:kotlin-base32"                               , version.ref = "kotlin-base32" }
+ajalt-mordant                        = { module = "com.github.ajalt.mordant:mordant"                                , version.ref = "ajalt-mordant" }
+ajalt-mordant-coroutines             = { module = "com.github.ajalt.mordant:mordant-coroutines"                     , version.ref = "ajalt-mordant" }
+ajalt-mordant-markdown               = { module = "com.github.ajalt.mordant:mordant-markdown"                       , version.ref = "ajalt-mordant" }
+ajalt-mordant-jvm-ffm                = { module = "com.github.ajalt.mordant:mordant-jvm-ffm"                        , version.ref = "ajalt-mordant" }
+ajalt-colormath                      = { module = "com.github.ajalt.colormath:colormath"                            , version.ref = "ajalt-colormath" }
+ajalt-clikt-core                     = { module = "com.github.ajalt.clikt:clikt-core"                               , version.ref = "ajalt-clikt" }
+ajalt-clikt                          = { module = "com.github.ajalt.clikt:clikt"                                    , version.ref = "ajalt-clikt" }
+ajalt-clikt-markdown                 = { module = "com.github.ajalt.clikt:clikt-markdown"                           , version.ref = "ajalt-clikt" }
+kommand                              = { module = "com.kgit2:kommand"                                               , version.ref = "kommand" }
+kflate                               = { module = "com.rafambn:KFlate"                                              , version.ref = "kflate" }

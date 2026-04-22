@@ -1,0 +1,76 @@
+product:
+  type: macos/app
+  platforms: [ macosArm64 ]
+
+settings:
+  jvm:
+    release: 25
+    storeParameterNames: true
+    jdk:
+      version: 25
+      distributions: [ zulu ]
+
+  kotlin:
+    version: 2.4.0-Beta1
+    languageVersion: 2.4
+    apiVersion: 2.4
+    progressiveMode: true
+    allWarningsAsErrors: false
+    suppressWarnings: false
+    verbose: false
+    freeCompilerArgs:
+      - -Wextra
+      - -Xexpect-actual-classes
+      - -Xreport-all-warnings
+      - -Xreturn-value-checker=full
+      - -Xcontext-sensitive-resolution
+      - -Xannotation-default-target=param-property
+      - -Xexplicit-backing-fields
+      - -Xconsistent-data-class-copy-visibility
+      - -Xname-based-destructuring=complete
+    optIns:
+      - kotlin.ExperimentalStdlibApi
+      - kotlin.ExperimentalUnsignedTypes
+      - kotlin.contracts.ExperimentalContracts
+      - kotlin.contracts.ExperimentalExtendedContracts
+      - kotlin.io.encoding.ExperimentalEncodingApi
+      - kotlin.time.ExperimentalTime
+      - kotlinx.coroutines.ExperimentalCoroutinesApi
+      - kotlinx.serialization.ExperimentalSerializationApi
+      - kotlin.ExperimentalMultiplatform
+      - kotlin.uuid.ExperimentalUuidApi
+      - kotlin.concurrent.atomics.ExperimentalAtomicApi
+      - dev.whyoleg.cryptography.DelicateCryptographyApi
+
+    serialization:
+      version: 1.11.0
+      format: json
+
+settings@native:
+  kotlin:
+    debug: false
+    optIns:
+      - kotlinx.cinterop.ExperimentalForeignApi
+      - kotlin.experimental.ExperimentalNativeApi
+
+dependencies:
+  - bom: $libs.kotlin.bom
+  - bom: $libs.kotlinx.coroutines.bom
+  - bom: $libs.kotlinx.serialization.bom
+  - bom: $libs.ktor.bom
+  - $libs.kotlinx.coroutines.core
+  - $libs.kotlinx.datetime
+  - $libs.kotlin.logging
+  - $libs.kotlin.cryptography.core
+  - $libs.kotlin.cryptography.optimal
+  - $libs.ajalt.clikt
+  - $libs.ajalt.mordant.coroutines
+  - $libs.kotlinx.io.core
+  - $libs.kflate
+
+dependencies@jvm:
+  - $libs.slf4j.simple
+
+test-dependencies:
+  - $libs.kotlin.test
+  - $libs.kotlinx.coroutines.test
