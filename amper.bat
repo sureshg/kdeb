@@ -1,7 +1,7 @@
 @echo off
 
 @rem
-@rem Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+@rem Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 @rem
 
 @rem Possible environment variables:
@@ -17,12 +17,11 @@
 setlocal
 
 @rem The version of the Amper distribution to provision and use
-set amper_version=0.11.0-dev-3863
+set amper_version=0.11.0-dev-3937
 @rem Establish chain of trust from here by specifying exact checksum of Amper distribution to be run
-set amper_sha256=04b59d8fa6fa44a8833746ea0fbef705260137fa78bc108ebeea7211378aa0d4
+set amper_sha256=44aac0b8766dc9904f7fc60a950bdc8bdfdae5414b8875a7fc1e9238a7dff5d3
 
 if not defined AMPER_DOWNLOAD_ROOT set AMPER_DOWNLOAD_ROOT=https://packages.jetbrains.team/maven/p/amper/amper
-if not defined AMPER_JRE_DOWNLOAD_ROOT set AMPER_JRE_DOWNLOAD_ROOT=https:/
 if not defined AMPER_BOOTSTRAP_CACHE_DIR set AMPER_BOOTSTRAP_CACHE_DIR=%LOCALAPPDATA%\JetBrains\Amper
 @rem remove trailing \ if present
 if [%AMPER_BOOTSTRAP_CACHE_DIR:~-1%] EQU [\] set AMPER_BOOTSTRAP_CACHE_DIR=%AMPER_BOOTSTRAP_CACHE_DIR:~0,-1%
@@ -121,11 +120,93 @@ set powershell=%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe
 if errorlevel 1 exit /b 1
 exit /b 0
 
+:find_project_context
+@rem Search upwards for an amper.bat wrapper file and/or project.yaml
+@rem Sets wrapper_script to the found wrapper path, or empty string if not found.
+@rem Returns errorlevel 0 if a valid wrapper (that is not this script itself) was found, 1 otherwise.
+set wrapper_script=
+set this_script=%~f0
+set project_dir=%CD%
+
+:find_loop
+set wrapper_candidate=%project_dir%\amper.bat
+if "%this_script%"=="%wrapper_candidate%" (
+    @rem Found itself (local wrapper case), no need to update any version or search further.
+    exit /b 1
+)
+
+if exist "%wrapper_candidate%" (
+    @rem Found a wrapper — check that a project context exists alongside it
+    if exist "%project_dir%\project.yaml" (
+        set wrapper_script=%wrapper_candidate%
+        exit /b 0
+    )
+    if exist "%project_dir%\module.yaml" (
+        set wrapper_script=%wrapper_candidate%
+        exit /b 0
+    )
+    echo WARNING: Found wrapper script '%wrapper_candidate%', but no project.yaml or module.yaml near it. Skipping. >&2
+    @rem Continue the search
+    goto :find_next_parent
+)
+
+if exist "%project_dir%\project.yaml" (
+    @rem Found project.yaml but no wrapper alongside it
+    echo WARNING: Found a project.yaml in '%project_dir%', but the wrapper script is missing; using $amper_version. >&2
+    exit /b 1
+)
+
+:find_next_parent
+@rem Move to parent directory
+for %%P in ("%project_dir%\..") do set parent_dir=%%~fP
+if "%parent_dir%"=="%project_dir%" (
+    @rem Reached the root, stop searching
+    exit /b 1
+)
+set project_dir=%parent_dir%
+goto :find_loop
+
+:parse_project_context
+@rem Parse amper_version and amper_sha256 from the found wrapper_script without executing it.
+set parsed_amper_version=
+set parsed_amper_sha256=
+
+for /f "tokens=2 delims==" %%A in ('findstr /r /c:"^set amper_version=[A-Za-z0-9._+-]*$" "%wrapper_script%"') do (
+    if not defined parsed_amper_version set parsed_amper_version=%%A
+)
+for /f "tokens=2 delims==" %%A in ('findstr /r /c:"^set amper_sha256=[0-9a-fA-F]*$" "%wrapper_script%"') do (
+    if not defined parsed_amper_sha256 set parsed_amper_sha256=%%A
+)
+
+if not defined parsed_amper_version (
+    echo ERROR: Suspicious local wrapper script: failed to detect the distribution version in '%wrapper_script%' >&2
+    exit /b 1
+)
+if not defined parsed_amper_sha256 (
+    echo ERROR: Suspicious local wrapper script: failed to detect the distribution checksum in '%wrapper_script%' >&2
+    exit /b 1
+)
+
+@rem Overwrite builtin values and proceed
+set amper_version=%parsed_amper_version%
+set amper_sha256=%parsed_amper_sha256%
+exit /b 0
+
 :fail
 echo ERROR: Amper bootstrap failed, see errors above
 exit /b 1
 
 :after_function_declarations
+
+REM ********** Project-local version detection **********
+
+if defined AMPER_WRAPPER_ALWAYS_USE_INTRINSIC_VERSION goto :after_local_version_detection
+
+call :find_project_context
+if errorlevel 1 goto :after_local_version_detection
+call :parse_project_context
+if errorlevel 1 goto fail
+:after_local_version_detection
 
 REM ********** Provision Amper distribution **********
 
@@ -134,63 +215,20 @@ set amper_target_dir=%AMPER_BOOTSTRAP_CACHE_DIR%\amper-cli-%amper_version%
 call :download_and_extract "Amper distribution v%amper_version%" "%amper_url%" "%amper_target_dir%" "%amper_sha256%" "256" "true"
 if errorlevel 1 goto fail
 
-REM ********** Provision JRE for Amper **********
+REM ********** Launch Amper **********
 
-if defined AMPER_JAVA_HOME (
-    if not exist "%AMPER_JAVA_HOME%\bin\java.exe" (
-      echo Invalid AMPER_JAVA_HOME provided: cannot find %AMPER_JAVA_HOME%\bin\java.exe
-      goto fail
-    )
-    @rem If AMPER_JAVA_HOME contains "jbr-21", it means we're inheriting it from the old Amper's update command.
-    @rem We must ignore it because Amper needs 25.
-    if "%AMPER_JAVA_HOME%"=="%AMPER_JAVA_HOME:jbr-21=%" (
-        set effective_amper_java_home=%AMPER_JAVA_HOME%
-        goto jre_provisioned
-    ) else (
-        echo WARN: AMPER_JAVA_HOME will be ignored because it points to a JBR 21, which is not valid for Amper anymore.
-        echo If you're updating from an Amper version older than 0.8.0, please ignore this message.
-    )
-)
-
-@rem Auto-updated from syncVersions.main.kts, do not modify directly here
-set zulu_version=25.32.21
-set java_version=25.0.2
+rem Determine the correct busybox binary based on architecture
 if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-    set jre_arch=aarch64
-    set jre_sha256=1106eec3bd166a117ccaf20f15bbec6537e27307be328b8a9e93a053c857fe7c
+    set busybox_exe=%amper_target_dir%\bin\busybox64a.exe
 ) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-    set jre_arch=x64
-    set jre_sha256=a4b7e3c3929d513cdc774583d375ce07fcb8671833258f468fd2fa0d8227ba48
+    set busybox_exe=%amper_target_dir%\bin\busybox64u.exe
 ) else (
-    echo Unknown Windows architecture %PROCESSOR_ARCHITECTURE% >&2
+    echo Unsupported architecture %PROCESSOR_ARCHITECTURE% >&2
     goto fail
 )
 
-@rem URL for the JRE (see https://api.azul.com/metadata/v1/zulu/packages?release_status=ga&include_fields=java_package_features,os,arch,hw_bitness,abi,java_package_type,sha256_hash,size,archive_type,lib_c_type&java_version=25&os=macos,linux,win)
-@rem https://cdn.azul.com/zulu/bin/zulu25.28.85-ca-jre25.0.0-win_x64.zip
-@rem https://cdn.azul.com/zulu/bin/zulu25.28.85-ca-jre25.0.0-win_aarch64.zip
-set jre_url=%AMPER_JRE_DOWNLOAD_ROOT%/cdn.azul.com/zulu/bin/zulu%zulu_version%-ca-jre%java_version%-win_%jre_arch%.zip
-set jre_target_dir=%AMPER_BOOTSTRAP_CACHE_DIR%\zulu%zulu_version%-ca-jre%java_version%-win_%jre_arch%
-call :download_and_extract "Amper runtime v%zulu_version%" "%jre_url%" "%jre_target_dir%" "%jre_sha256%" "256" "false"
-if errorlevel 1 goto fail
-
-set effective_amper_java_home=
-for /d %%d in ("%jre_target_dir%\*") do if exist "%%d\bin\java.exe" set effective_amper_java_home=%%d
-if not exist "%effective_amper_java_home%\bin\java.exe" (
-  echo Unable to find java.exe under %jre_target_dir%
-  goto fail
-)
-:jre_provisioned
-
-REM ********** Launch Amper **********
-
-"%effective_amper_java_home%\bin\java.exe" ^
-  @"%amper_target_dir%\amper.args" ^
-  "-Damper.wrapper.dist.sha256=%amper_sha256%" ^
-  "-Damper.dist.path=%amper_target_dir%" ^
-  "-Damper.wrapper.path=%~f0" ^
-  %AMPER_JAVA_OPTIONS% ^
-  -cp "%amper_target_dir%\lib\*" ^
-  org.jetbrains.amper.cli.MainKt ^
-  %*
+rem We use busybox here because it doesn't reinterpret the user-passed command-line arguments (that we pass via %*).
+rem Also this way we can use the unified launcher script (.sh)
+set AMPER_WRAPPER_PATH=%~f0
+"%busybox_exe%" sh "%amper_target_dir%\bin\launcher.sh" %*
 exit /B %ERRORLEVEL%

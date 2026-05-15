@@ -4,30 +4,30 @@ product:
 
 settings:
   jvm:
-    release: 25
     storeParameterNames: true
     jdk:
-      version: 25
+      version: 26
       distributions: [ zulu ]
 
   kotlin:
-    version: 2.4.0-Beta1
+    version: 2.4.0-RC
     languageVersion: 2.4
     apiVersion: 2.4
     progressiveMode: true
+    powerAssert: enabled
     allWarningsAsErrors: false
     suppressWarnings: false
     verbose: false
     freeCompilerArgs:
       - -Wextra
+      - -Xcollection-literals
       - -Xexpect-actual-classes
       - -Xreport-all-warnings
       - -Xreturn-value-checker=full
       - -Xcontext-sensitive-resolution
-      - -Xannotation-default-target=param-property
-      - -Xexplicit-backing-fields
       - -Xconsistent-data-class-copy-visibility
       - -Xname-based-destructuring=complete
+      - -Xexplicit-context-arguments
     optIns:
       - kotlin.ExperimentalStdlibApi
       - kotlin.ExperimentalUnsignedTypes
