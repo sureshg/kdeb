@@ -35,9 +35,7 @@ SystemFileSystem.sink(Path("hello_1.0-1_amd64.deb")).buffered().use { pkg.writeT
 - Creates missing parent directories automatically
 - Supports reproducible builds with a fixed `buildTime`
 
-## Building
-
-The project uses [Kotlin Toolchain](https://kotlin-toolchain.org/dev/). From the project root:
+## Build
 
 ```sh
 ./kotlin build -v release
