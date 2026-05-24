@@ -37,10 +37,10 @@ SystemFileSystem.sink(Path("hello_1.0-1_amd64.deb")).buffered().use { pkg.writeT
 
 ## Building
 
-The project uses [Amper](https://github.com/JetBrains/amper). From the project root:
+The project uses [Kotlin Toolchain](https://kotlin-toolchain.org/dev/). From the project root:
 
 ```sh
-./amper build -v release
+./kotlin build -v release
 ```
 
 ## License
