@@ -66,8 +66,10 @@ class TarWriter(private val sink: Sink) {
             // Emit a GNU LongLink ('L') entry with the full path as payload,
             // then a regular header carrying a truncated name (dpkg accepts this).
             val payload = nameBytes + 0.toByte()
-            writeHeader(LONGLINK_NAME, TYPE_LONGLINK, payload.size.toLong(),
-                mode = 0, uid = 0, gid = 0, user = "root", group = "root", mtime = 0)
+            writeHeader(
+                LONGLINK_NAME, TYPE_LONGLINK, payload.size.toLong(),
+                mode = 0, uid = 0, gid = 0, user = "root", group = "root", mtime = 0
+            )
             sink.write(payload)
             padToBlock(payload.size)
             nameBytes.copyOf(NAME_MAX)
@@ -96,9 +98,9 @@ class TarWriter(private val sink: Sink) {
 
         val h = ByteArray(BLOCK)
         nameBytes.copyInto(h, destinationOffset = 0)
-        writeOctal(h, offset = 100, width = 8,  value = mode.toLong() and 0xFFF)
-        writeOctal(h, offset = 108, width = 8,  value = uid.toLong())
-        writeOctal(h, offset = 116, width = 8,  value = gid.toLong())
+        writeOctal(h, offset = 100, width = 8, value = mode.toLong() and 0xFFF)
+        writeOctal(h, offset = 108, width = 8, value = uid.toLong())
+        writeOctal(h, offset = 116, width = 8, value = gid.toLong())
         writeOctal(h, offset = 124, width = 12, value = size)
         writeOctal(h, offset = 136, width = 12, value = mtime)
         h.fill(SP, fromIndex = 148, toIndex = 156)      // checksum placeholder (8 spaces)

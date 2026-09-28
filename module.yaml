@@ -10,11 +10,11 @@ settings:
       distributions: [ zulu ]
 
   kotlin:
-    version: 2.4.0-RC
-    languageVersion: 2.4
-    apiVersion: 2.4
+    version: 2.5.0-Beta1
+    languageVersion: 2.5
+    apiVersion: 2.5
+    explicitApi: disable
     progressiveMode: true
-    powerAssert: enabled
     allWarningsAsErrors: false
     suppressWarnings: false
     verbose: false
@@ -28,6 +28,7 @@ settings:
       - -Xconsistent-data-class-copy-visibility
       - -Xname-based-destructuring=complete
       - -Xexplicit-context-arguments
+      - -Xcompanion-blocks-and-extensions
     optIns:
       - kotlin.ExperimentalStdlibApi
       - kotlin.ExperimentalUnsignedTypes
@@ -43,7 +44,7 @@ settings:
       - dev.whyoleg.cryptography.DelicateCryptographyApi
 
     serialization:
-      version: 1.11.0
+      version: 1.12.0-RC
       format: json
 
 settings@native:
@@ -70,6 +71,18 @@ dependencies:
 
 dependencies@jvm:
   - $libs.slf4j.simple
+
+test-settings:
+  kotlin:
+    powerAssert:
+      enabled: true
+      functions:
+        - kotlin.assert
+        - kotlin.require
+        - kotlin.test.assertTrue
+        - kotlin.test.assertEquals
+        - kotlin.test.assertNull
+        - kotlin.test.assertContentEquals
 
 test-dependencies:
   - $libs.kotlin.test

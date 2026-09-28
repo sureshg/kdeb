@@ -3,7 +3,8 @@ package deb
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-@DslMarker annotation class DebDsl
+@DslMarker
+annotation class DebDsl
 
 /**
  * Entry point for the Debian package DSL.
@@ -36,10 +37,21 @@ class DebPackageBuilder {
         entries += DataBuilder(buildTime).apply(block).entries
     }
 
-    fun preinst(script: String)  { scripts = scripts.copy(preinst = script) }
-    fun postinst(script: String) { scripts = scripts.copy(postinst = script) }
-    fun prerm(script: String)    { scripts = scripts.copy(prerm = script) }
-    fun postrm(script: String)   { scripts = scripts.copy(postrm = script) }
+    fun preinst(script: String) {
+        scripts = scripts.copy(preinst = script)
+    }
+
+    fun postinst(script: String) {
+        scripts = scripts.copy(postinst = script)
+    }
+
+    fun prerm(script: String) {
+        scripts = scripts.copy(prerm = script)
+    }
+
+    fun postrm(script: String) {
+        scripts = scripts.copy(postrm = script)
+    }
 
     fun build(): DebPackage = DebPackage(
         meta = requireNotNull(meta) { "control { } block is required" },
@@ -60,7 +72,9 @@ class ControlBuilder {
 
     private val depends = mutableListOf<String>()
 
-    fun depends(vararg specs: String) { depends += specs }
+    fun depends(vararg specs: String) {
+        depends += specs
+    }
 
     fun build(): PackageMeta = PackageMeta(
         name = packageName,

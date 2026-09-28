@@ -1,7 +1,7 @@
 package deb
 
-import com.rafambn.kflate.GZIP
 import com.rafambn.kflate.KFlate
+import com.rafambn.kflate.compression.Gzip
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.MD5
 import kotlinx.io.Buffer
@@ -23,8 +23,7 @@ import kotlin.time.Clock
  * accepted by `dpkg` / `apt` on all supported Debian and Ubuntu releases.
  */
 fun DebPackage.writeTo(sink: Sink) {
-    val mtime: Long = entries.firstOrNull()?.mtime?.epochSeconds
-        ?: Clock.System.now().epochSeconds
+    val mtime: Long = entries.firstOrNull()?.mtime?.epochSeconds ?: Clock.System.now().epochSeconds
 
     val controlTarGz = buildControlTarGz(mtime)
     val dataTarGz = buildDataTarGz()
@@ -45,10 +44,10 @@ private fun DebPackage.buildControlTarGz(mtime: Long): ByteArray = gzipTar { tar
     if (md5.isNotEmpty()) tar.writeFile("./md5sums", md5.encodeToByteArray(), mtime = mtime)
 
     // Maintainer scripts MUST be mode 0755 — dpkg refuses otherwise.
-    writeScript(tar, "preinst",  scripts.preinst,  mtime)
+    writeScript(tar, "preinst", scripts.preinst, mtime)
     writeScript(tar, "postinst", scripts.postinst, mtime)
-    writeScript(tar, "prerm",    scripts.prerm,    mtime)
-    writeScript(tar, "postrm",   scripts.postrm,   mtime)
+    writeScript(tar, "prerm", scripts.prerm, mtime)
+    writeScript(tar, "postrm", scripts.postrm, mtime)
 }
 
 private fun writeScript(tar: TarWriter, name: String, body: String?, mtime: Long) {
@@ -82,6 +81,7 @@ private fun DebPackage.buildDataTarGz(): ByteArray = gzipTar { tar ->
                 user = entry.user, group = entry.group,
                 mtime = entry.mtime.epochSeconds,
             )
+
             is DataEntry.Directory -> tar.writeDirectory(
                 name = "./" + entry.targetPath.trimStart('/'),
                 mode = entry.mode, uid = entry.uid, gid = entry.gid,
@@ -100,7 +100,7 @@ private fun DebPackage.controlFile(): String = buildString {
     appendLine("Architecture: ${meta.architecture}")
     appendLine("Maintainer: ${meta.maintainer}")
     appendLine("Installed-Size: ${installedSizeKiB(entries)}")
-    meta.section?.let  { appendLine("Section: $it") }
+    meta.section?.let { appendLine("Section: $it") }
     meta.priority?.let { appendLine("Priority: $it") }
     if (meta.depends.isNotEmpty()) appendLine("Depends: ${meta.depends.joinToString(", ")}")
     appendLine("Description: ${foldDescription(meta.description)}")
@@ -150,7 +150,7 @@ private fun gzipTar(block: (TarWriter) -> Unit): ByteArray {
     val tar = TarWriter(buf)
     block(tar)
     tar.finish()
-    return KFlate.compress(buf.readByteArray(), GZIP())
+    return KFlate.compress(buf.readByteArray(), Gzip())
 }
 
 /** Returns every ancestor directory of [path], top-down: e.g.
